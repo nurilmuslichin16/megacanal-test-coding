@@ -3,14 +3,14 @@
         <div class="col-6">
             <h2><u>PRODUCT LIST</u></h2>
         </div>
-        <div class="col-6">
+        <div class="col-6" style="text-align: right;">
             <a href="#" id="btnShowProduct" class="btn btn-primary">Show Products</a>
         </div>
     </div>
     <table id="listProduct" class="table table-bordered table-hover">
         <thead>
             <tr>
-                <th scope="col">Image</th>
+                <th scope="col" style="width: 20%;">Image</th>
                 <th scope="col">Title</th>
                 <th scope="col">Category</th>
                 <th scope="col">Brand</th>
@@ -20,21 +20,18 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <th>
-                    <img style="width: 20%;" src="https://www.nurulfikri.com/wp-content/uploads/2019/11/logo-2582748_960_720.png" alt="Logo Product">
-                </th>
-                <td>IPhone 13</td>
-                <td>Phone</td>
-                <td>Apple</td>
-                <td>10</td>
-                <td>13000000</td>
-                <td>
-                    <a href="#" data-bs-toggle="modal" data-bs-target="#detailModal" class="btn btn-primary">View</a>
-                </td>
-            </tr>
         </tbody>
     </table>
+
+    <footer class="mt-5 mb-5">
+        <div class="row">
+            <div class="col-12">
+                <div class="text-center">
+                    <b>&copy; 2023</b> Developer by <a href="https://www.linkedin.com/in/nurilmuslichin16/">Nuril Muslichin</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 </div>
 
 <script>
@@ -42,9 +39,75 @@
         $('#listProduct').DataTable();
 
         $('#btnShowProduct').click(function() {
-            alert('Okee');
+            $.ajax({
+                url: 'https://dummyjson.com/products',
+                dataType: 'JSON',
+                success: function(data) {
+                    var table = $('#listProduct').DataTable();
+                    table.clear();
+
+                    $.each(data.products, function(index, value) {
+                        table.row.add([
+                            '<img style="width: 100%;" src="' + value.thumbnail + '" alt="Logo Product">',
+                            value.title,
+                            value.category,
+                            value.brand,
+                            value.stock,
+                            '$ ' + value.price,
+                            '<a href="#" onclick="detail(' + value.id + ')" class="btn btn-primary">View</a>'
+                        ]);
+
+                        table.draw();
+                    });
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.log(textStatus);
+                }
+            })
         });
     });
+
+    function detail(id) {
+        $.ajax({
+            url: 'https://dummyjson.com/products/' + id,
+            dataType: 'JSON',
+            success: function(data) {
+                let price = '<b>Price</b> : $ ' + data.price;
+                let category = '<b>Category</b> : ' + data.category;
+                let brand = '<b>Brand</b> : ' + data.brand;
+                let stock = '<b>Stock</b> : ' + data.stock;
+                let rating = String(data.rating);
+                let arrayRating = rating.split('.');
+
+                let htmlStar = "";
+                console.log(rating);
+
+                for (let index = 1; index <= 5; index++) {
+                    if (arrayRating[0] >= index) {
+                        htmlStar += '<span class="fa fa-star checked"></span>';
+                    } else if (arrayRating[0] >= (index - 1) && arrayRating[1].charAt(0) > 4) {
+                        htmlStar += '<span class="fa fa-star-half-o checked"></span>';
+                    } else {
+                        htmlStar += '<span class="fa fa-star-o checked"></span>';
+                    }
+                }
+
+                $('#title').text(data.title);
+                $('#price').html(price);
+                $('#star').html(htmlStar);
+                $('#imageProduct').attr('src', data.thumbnail);
+                $('#brand').html(brand);
+                $('#stock').html(stock);
+                $('#description').text(data.description);
+
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log(textStatus);
+            }
+        })
+
+        $('#detailModal').modal('show');
+    }
 </script>
 
 <!-- Modal -->
@@ -58,35 +121,35 @@
             <div class="modal-body">
                 <div class="row">
                     <div class="col-6">
-                        <h4><u>IPhone 13</u></h4>
+                        <h4><u id="title">IPhone 13</u></h4>
                     </div>
-                    <div class="col-3">
-                        Price : $1999
+                    <div class="col-3" id="price">
+                        <b>Price</b> : $ 1999
                     </div>
-                    <div class="col-3">
+                    <div class="col-3" id="star">
                         <span class="fa fa-star checked"></span>
                         <span class="fa fa-star checked"></span>
                         <span class="fa fa-star checked"></span>
-                        <span class="fa fa-star"></span>
-                        <span class="fa fa-star"></span>
+                        <span class="fa fa-star-half-o checked"></span>
+                        <span class="fa fa-star-o checked"></span>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-6">
-                        <img style="width: 80%;" src="https://cdn.eraspace.com/media/catalog/product/i/p/iphone_13_blue_1.jpg" alt="">
+                        <img id="imageProduct" style="width: 80%;" src="https://cdn.eraspace.com/media/catalog/product/i/p/iphone_13_blue_1.jpg" alt="Gambar Product">
                     </div>
                     <div class="col-6">
-                        <div class="row">
-                            <div class="col-6">
+                        <div class="row mt-2">
+                            <div class="col-6" id="category">
                                 <b>Category</b> : Smartphone
                             </div>
-                            <div class="col-6">
+                            <div class="col-6" id="brand">
                                 <b>Brand</b> : Apple
                             </div>
                         </div>
-                        <p class="mt-4"><b>Stock</b> : 900</p>
+                        <p class="mt-4" id="stock"><b>Stock</b> : 900</p>
                         <p class="mt-4"><b>Description :</b></p>
-                        <p>
+                        <p id="description">
                             iPhone 13. Sistem kamera ganda paling canggih yang pernah ada di iPhone. Chip A15 Bionic yang secepat kilat. Lompatan besar dalam kekuatan baterai. Desain kokoh
                         </p>
                     </div>
